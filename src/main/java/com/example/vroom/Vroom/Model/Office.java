@@ -21,7 +21,7 @@ public class Office {
     private String country;
     @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "inventory_id", referencedColumnName = "id")
+    @JoinColumn(name = "inventory_id", referencedColumnName = "id", unique = true)
     private Inventory inventory;
     @JsonIgnore
     @OneToMany(mappedBy = "office")

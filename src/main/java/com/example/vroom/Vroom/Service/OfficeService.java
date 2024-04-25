@@ -1,11 +1,15 @@
 package com.example.vroom.Vroom.Service;
 
+import com.example.vroom.Vroom.Model.Inventory;
 import com.example.vroom.Vroom.Model.Office;
+import com.example.vroom.Vroom.Repository.InventoryRepository;
 import com.example.vroom.Vroom.Repository.OfficeRepository;
-import com.example.vroom.Vroom.config.MapperConfig;
+import com.example.vroom.Vroom.dto.InventoryDTO;
+import com.example.vroom.Vroom.dto.OfficeDTO;
+import com.example.vroom.Vroom.exceptions.BadRequestException;
 import com.example.vroom.Vroom.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,47 +19,79 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OfficeService {
     private final OfficeRepository officeRepository;
-    private final MapperConfig mapperConfig;
+    private final ModelMapper modelMapper;
+    private final InventoryRepository inventoryRepository;
 
-    public List<Office> getAllOffices() {
-        return officeRepository.findAll();
+    public List<OfficeDTO> getAllOffices() {
+        List<Office> offices = officeRepository.findAll();
+        return offices.stream().map(office -> modelMapper.map(office, OfficeDTO.class)).toList();
     }
 
-    public Office getOfficeById(Long id) throws NotFoundException {
+    public OfficeDTO getOfficeById(Long id) throws NotFoundException {
         Optional<Office> office = officeRepository.findById(id);
         if (office.isEmpty()) {
             throw new NotFoundException("Office not found");
         }
-        return office.get();
+        return modelMapper.map(office.get(), OfficeDTO.class);
     }
 
-    public Office addOffice(Office office) {
-        return officeRepository.save(office);
+    public OfficeDTO addOffice(OfficeDTO office, Long InventoryId) throws NotFoundException {
+        Optional<Inventory> inventory = inventoryRepository.findById(InventoryId);
+        if (inventory.isEmpty()) {
+            throw new NotFoundException("Inventory not found");
+        }
+        Office officeToAdd = modelMapper.map(office, Office.class);
+        officeToAdd.setInventory(inventory.get());
+        Office addedOffice = officeRepository.save(officeToAdd);
+        return modelMapper.map(addedOffice, OfficeDTO.class);
     }
 
-    public Office updateOffice(Office office) {
-        return officeRepository.save(office);
+    public OfficeDTO updateOffice(Long id, OfficeDTO office, Long inventoryId) throws NotFoundException {
+        Optional<Office> officeOptional = officeRepository.findById(id);
+        if (officeOptional.isEmpty()) {
+            throw new NotFoundException("Office not found");
+        }
+        Office officeToUpdate = officeOptional.get();
+        officeToUpdate.setCity(office.getCity());
+        officeToUpdate.setCountry(office.getCountry());
+        officeToUpdate.setAddress(office.getAddress());
+        if (inventoryId != null) {
+            Optional<Inventory> inventory = inventoryRepository.findById(inventoryId);
+            if (inventory.isEmpty()) {
+                throw new NotFoundException("Inventory not found");
+            }
+            officeToUpdate.setInventory(inventory.get());
+        }
+        return modelMapper.map(officeRepository.save(officeToUpdate), OfficeDTO.class);
     }
 
-    public void deleteOffice(Long id) {
+    public void deleteOffice(Long id) throws NotFoundException {
+        Optional<Office> office = officeRepository.findById(id);
+        if (office.isEmpty()) {
+            throw new NotFoundException("Office not found");
+        }
+        inventoryRepository.delete(office.get().getInventory());
         officeRepository.deleteById(id);
     }
 
-    public List<Office> getOfficeByCity(String city) {
-        return officeRepository.findByCity(city);
+    public List<OfficeDTO> getOfficeByCity(String city) {
+        List<Office> offices = officeRepository.findByCity(city);
+        return offices.stream().map(office -> modelMapper.map(office, OfficeDTO.class)).toList();
     }
 
-    public List<Office> getOfficeByCountry(String country) {
-        return officeRepository.findByCountry(country);
+    public List<OfficeDTO> getOfficeByCountry(String country) {
+        List<Office> offices = officeRepository.findByCountry(country);
+        return offices.stream().map(office -> modelMapper.map(office, OfficeDTO.class)).toList();
     }
 
-    public List<Office> getOfficeByCityAndCountry(String city, String country) {
-        return officeRepository.findByCityAndCountry(city, country);
+    public List<OfficeDTO> getOfficeByCityAndCountry(String city, String country) {
+        List<Office> offices = officeRepository.findByCityAndCountry(city, country);
+        return offices.stream().map(office -> modelMapper.map(office, OfficeDTO.class)).toList();
     }
 
-    public List<Office> getOfficeByAddress(String address) {
-        return officeRepository.findByAddress(address);
+    public List<OfficeDTO> getOfficeByAddress(String address) {
+        List<Office> offices = officeRepository.findByAddress(address);
+        return offices.stream().map(office -> modelMapper.map(office, OfficeDTO.class)).toList();
     }
-
 
 }

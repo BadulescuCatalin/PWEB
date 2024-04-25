@@ -87,7 +87,9 @@ public class JwtFilter extends OncePerRequestFilter {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid role in bearer token");
             return;
         }
-        if (requestURI.startsWith("/admin") && !"ROLE_ADMIN".equals(role)) {
+        if ((requestURI.startsWith("/admin") || requestURI.startsWith("/inventory") ||
+                requestURI.startsWith("/office"))
+                && !"ROLE_ADMIN".equals(role)) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid role in bearer token");
         }
         if (requestURI.startsWith("/client") && !"ROLE_CLIENT".equals(role)) {
