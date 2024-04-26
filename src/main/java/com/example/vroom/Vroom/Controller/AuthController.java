@@ -22,7 +22,7 @@ public class AuthController {
     private final ClientService clientService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> register(@RequestBody UserDTO user) {
+    public ResponseEntity<UserDTO> register(@RequestBody UserDTO user) throws BadRequestException {
         // register a new user
         if (user.getRole().equals(Role.ROLE_ADMIN))
             return ResponseEntity.ok(adminService.addAdmin(user));

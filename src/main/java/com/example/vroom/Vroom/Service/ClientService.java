@@ -1,19 +1,16 @@
 package com.example.vroom.Vroom.Service;
 
-import com.example.vroom.Vroom.Model.Admin;
 import com.example.vroom.Vroom.Model.Client;
 import com.example.vroom.Vroom.Model.LoginRequest;
 import com.example.vroom.Vroom.Repository.ClientRepository;
 import com.example.vroom.Vroom.config.jwt.JwtTokenResolver;
 import com.example.vroom.Vroom.dto.UserDTO;
-import com.example.vroom.Vroom.dto.UserDetailsDTO;
-import com.example.vroom.Vroom.dto.UserRequest;
+import com.example.vroom.Vroom.dto.UserRequestResponse;
 import com.example.vroom.Vroom.exceptions.BadRequestException;
 import com.example.vroom.Vroom.exceptions.NotFoundException;
 import com.example.vroom.Vroom.utils.Utils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,17 +22,17 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ModelMapper modelMapper;
     private final JwtTokenResolver jwtTokenResolver;
-    public List<UserRequest> getAllClients() {
+    public List<UserRequestResponse> getAllClients() {
         List<Client> clients = clientRepository.findAll();
-        return clients.stream().map(client -> modelMapper.map(client, UserRequest.class)).toList();
+        return clients.stream().map(client -> modelMapper.map(client, UserRequestResponse.class)).toList();
     }
 
-    public UserRequest getClientById(Long id) throws NotFoundException {
+    public UserRequestResponse getClientById(Long id) throws NotFoundException {
         Optional<Client> client = clientRepository.findById(id);
         if (client.isEmpty()) {
             throw new NotFoundException("Client not found");
         }
-        return modelMapper.map(client, UserRequest.class);
+        return modelMapper.map(client, UserRequestResponse.class);
     }
 
     public UserDTO addClient(UserDTO user) {
@@ -45,7 +42,7 @@ public class ClientService {
         return modelMapper.map(clientAdded, UserDTO.class);
     }
 
-    public UserRequest updateClient(UserRequest client, Long id) throws NotFoundException {
+    public UserRequestResponse updateClient(UserRequestResponse client, Long id) throws NotFoundException {
         Optional<Client> clientOptional = clientRepository.findById(id);
         if (clientOptional.isEmpty()) {
             throw new NotFoundException("Client not found");
@@ -54,7 +51,7 @@ public class ClientService {
         clientToUpdate.setFirstName(client.getFirstName());
         clientToUpdate.setLastName(client.getLastName());
         clientToUpdate.setEmail(client.getEmail());
-        return modelMapper.map(clientRepository.save(clientToUpdate), UserRequest.class);
+        return modelMapper.map(clientRepository.save(clientToUpdate), UserRequestResponse.class);
     }
 
     public void deleteClient(Long id) throws NotFoundException {
@@ -62,12 +59,12 @@ public class ClientService {
         clientRepository.deleteById(id);
     }
 
-    public UserRequest getClientByEmail(String email) throws NotFoundException {
+    public UserRequestResponse getClientByEmail(String email) throws NotFoundException {
         Client client = clientRepository.findByEmail(email);
         if (client == null) {
             throw new NotFoundException("Client not found");
         }
-        return modelMapper.map(client, UserRequest.class);
+        return modelMapper.map(client, UserRequestResponse.class);
     }
 
     // login si de facut token

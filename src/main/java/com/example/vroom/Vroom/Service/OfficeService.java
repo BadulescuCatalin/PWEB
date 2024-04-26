@@ -1,12 +1,12 @@
 package com.example.vroom.Vroom.Service;
 
+import com.example.vroom.Vroom.Model.Admin;
 import com.example.vroom.Vroom.Model.Inventory;
 import com.example.vroom.Vroom.Model.Office;
+import com.example.vroom.Vroom.Repository.AdminRepository;
 import com.example.vroom.Vroom.Repository.InventoryRepository;
 import com.example.vroom.Vroom.Repository.OfficeRepository;
-import com.example.vroom.Vroom.dto.InventoryDTO;
 import com.example.vroom.Vroom.dto.OfficeDTO;
-import com.example.vroom.Vroom.exceptions.BadRequestException;
 import com.example.vroom.Vroom.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,6 +21,7 @@ public class OfficeService {
     private final OfficeRepository officeRepository;
     private final ModelMapper modelMapper;
     private final InventoryRepository inventoryRepository;
+    private final AdminRepository adminRepository;
 
     public List<OfficeDTO> getAllOffices() {
         List<Office> offices = officeRepository.findAll();
@@ -71,6 +72,11 @@ public class OfficeService {
             throw new NotFoundException("Office not found");
         }
         inventoryRepository.delete(office.get().getInventory());
+        List<Admin> admins = adminRepository.findByOfficeId(office.get().getId());
+        for (Admin admin : admins) {
+            admin.setOffice(null);
+            adminRepository.save(admin);
+        }
         officeRepository.deleteById(id);
     }
 

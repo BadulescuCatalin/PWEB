@@ -36,10 +36,9 @@ public class AdminService {
         return modelMapper.map(admin.get(), UserDetailsDTO.class);
     }
 
-    public UserDTO addAdmin(UserDTO user) {
+    public UserDTO addAdmin(UserDTO user) throws BadRequestException {
         if (adminRepository.findByEmail(user.getEmail()) != null) {
-            // SASD
-            return null;
+           throw new BadRequestException("Admin with this email already exists");
         }
         user.setPassword(Utils.hashWithKey(user.getPassword()));
         Admin adminToAdd = modelMapper.map(user, Admin.class);

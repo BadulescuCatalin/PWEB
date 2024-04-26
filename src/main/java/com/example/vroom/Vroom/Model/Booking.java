@@ -20,6 +20,9 @@ public class Booking {
     private Double price;
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer numberOfGps;
+    private Integer numberOfBabySeats;
+    private Integer numberOfExtraBaggage;
     @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "feedback_id", referencedColumnName = "id")
